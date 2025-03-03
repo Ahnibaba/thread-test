@@ -1,9 +1,10 @@
-import { Box, Button, Flex, Heading, HStack, Icon, Input, Link, Stack, Text } from '@chakra-ui/react'
+import { Box, Button, Flex, Field, Heading, HStack, Icon, Input, Link, Stack, Text, Group, InputAddon } from '@chakra-ui/react'
 import { useState } from 'react'
 import { useColorModeValue } from './ui/color-mode'
-import { FormControl, FormLabel } from '@chakra-ui/form-control'
-import { InputGroup, InputRightElement } from '@chakra-ui/input'
 import { IoEyeOffOutline, IoEyeOutline } from 'react-icons/io5'
+import useAuth from '../../store/useAuth'
+import useShowToast from '../hooks/useShowToast'
+import axios from 'axios'
 
 
 
@@ -12,12 +13,46 @@ import { IoEyeOffOutline, IoEyeOutline } from 'react-icons/io5'
 
 const LoginCard = () => {
     const [showPassword, setShowPassword] = useState()
+    const [loginValues, setLoginValues] = useState({
+        username: "",
+        password: ""
+    })
+    const [loading, setLoading] = useState(false)
+
+    const { value, setValue, setLoggedInUser } = useAuth()
+
+    const showToast = useShowToast()
+
+    const handleChange = (e) => {
+        const name = e.target.name
+        const value = e.target.value
+
+        setLoginValues((prev) => ({ ...prev, [name]: value }))
+    }
+
+    const handleLogin = async () => {
+        setLoading(true)
+        try {
+            const { data } = await axios.post("/api/users/login", loginValues)
+            localStorage.setItem("threadUser", JSON.stringify(data))
+            setLoggedInUser(data)
+            showToast("Success", "success", "Login Successful")
+
+        } catch (error) {
+            showToast("Error", "error", error.response.data.error)
+            console.log(error);
+
+        } finally {
+            setLoading(false)
+        }
+    }
+
     return (
         <Flex align={"center"} justify={"center"}>
             <Stack gap={8} mx={"auto"} maxW={"lg"} py={12} px={6}>
                 <Stack align={"center"}>
                     <Heading fontSize={"4xl"} textAlign={"center"}>
-                        Login 
+                        Login
                     </Heading>
                 </Stack>
                 <Box
@@ -31,17 +66,25 @@ const LoginCard = () => {
                     }}
                 >
                     <Stack gap={4}>
-                        
-                        <FormControl isRequired>
-                            <FormLabel>Username</FormLabel>
-                            <Input type="text" />
-                        </FormControl>
-                        <FormControl isRequired>
-                            <FormLabel>Password</FormLabel>
-                            <InputGroup>
 
-                                <Input type={showPassword ? "text" : "password"} />
-                                <InputRightElement h={"full"}>
+                        <Field.Root required>
+                            <Field.Label>Username</Field.Label>
+                            <Input type="text"
+                                name="username"
+                                onChange={handleChange}
+                                value={loginValues.username}
+                            />
+                        </Field.Root>
+                        <Field.Root required>
+                            <Field.Label>Password</Field.Label>
+                            <Group attached w={"full"}>
+
+                                <Input type={showPassword ? "text" : "password"}
+                                    name="password"
+                                    onChange={handleChange}
+                                    value={loginValues.password}
+                                />
+                                <InputAddon h={"full"}>
                                     <Button
                                         variant={"ghost"}
                                         onClick={() => setShowPassword((showPassword) => !showPassword)}
@@ -52,21 +95,23 @@ const LoginCard = () => {
 
                                         </Icon>
                                     </Button>
-                                </InputRightElement>
+                                </InputAddon>
 
-                            </InputGroup>
+                            </Group>
 
-                        </FormControl>
+                        </Field.Root>
 
                         <Stack gap={10} pt={2}>
                             <Button
-                                loadingText="Submitting"
+                                loadingText="Logging in"
                                 size={"lg"}
                                 bg={useColorModeValue("gray.600", "gray.700")}
                                 color={"white"}
                                 _hover={{
                                     bg: useColorModeValue("gray.700", "gray.800")
                                 }}
+                                onClick={handleLogin}
+                                loading={loading}
                             >
                                 Login
                             </Button>
@@ -74,7 +119,7 @@ const LoginCard = () => {
 
                         <Stack pt={6}>
                             <Text alignItems={"center"}>
-                                Don't have an account? <Link color="blue.400">Sign up</Link>
+                                Don't have an account? <Link color="blue.400" onClick={() => setValue("signup")}>Sign up</Link>
                             </Text>
                         </Stack>
 

@@ -1,32 +1,37 @@
 import { Button, Container } from "@chakra-ui/react";
 import React from "react";
-import { useColorMode, useColorModeValue } from "./components/ui/color-mode";
-import { Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 import UserPage from "./pages/UserPage";
 import PostPage from "./pages/PostPage";
 import Header from "./components/Header";
 import { Toaster } from "./components/ui/toaster";
 import HomePage from "./pages/HomePage";
 import AuthPage from "./pages/AuthPage";
+import useAuth from "../store/useAuth";
+import LogoutButton from "./components/LogoutButton";
+import UpdateProfilePage from "./pages/UpdateProfilePage";
+import CreatePost from "./components/CreatePost";
 
 
 const App = () => {
-  const { toggleColorMode } = useColorMode();
+  const { loggedInUser } = useAuth()
+
   
-  // Custom colors for button based on color mode
-  const bg = useColorModeValue("gray.100", "#101010"); // Light: Gray | Dark: Blue Gray
-  const color = useColorModeValue("gray.800", "whiteAlpha.900");
 
   return (
     <Container maxW="620px">
       <Toaster />
       <Header />
        <Routes>
-         <Route path="/" element={<HomePage />} />
-         <Route path="/auth" element={<AuthPage />} />
+         <Route path="/" element={loggedInUser ? <HomePage /> : <Navigate to="/auth" />} />
+         <Route path="/auth" element={!loggedInUser ? <AuthPage />  : <Navigate to="/" />} />
          <Route path="/:username" element={<UserPage />} />
          <Route path="/:username/post/:pid" element={<PostPage />} />
+         <Route path="/update" element={loggedInUser ? <UpdateProfilePage /> : <Navigate to="/auth" />} />
        </Routes>
+
+       {loggedInUser && <LogoutButton />}
+       {loggedInUser && <CreatePost />}
     </Container> 
 
   );

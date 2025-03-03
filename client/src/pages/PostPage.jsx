@@ -1,10 +1,10 @@
 import { Box, Button, Flex, Image, Text } from "@chakra-ui/react"
-import { Avatar } from "@/components/ui/avatar"
+import { Avatar } from "../components/ui/avatar"
 import { BsThreeDots } from "react-icons/bs"
-import Actions from "@/components/Actions"
+import Actions from "../components/Actions"
 import { useState } from "react"
-import Comments from "@/components/Comments"
-import CustomDivider from "@/components/CustomDivider"
+import Comments from "../components/Comments"
+import CustomDivider from "../components/CustomDivider"
 
 
 
