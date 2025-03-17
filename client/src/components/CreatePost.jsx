@@ -19,6 +19,8 @@ import usePreviewImage from "@/hooks/usePreviewImage"
 import useAuth from "../../store/useAuth"
 import useShowToast from "@/hooks/useShowToast"
 import axios from "axios"
+import usePosts from "../../store/usePosts"
+import { useParams } from "react-router-dom"
 
 const MAX_CHAR = 500
 
@@ -30,6 +32,8 @@ const CreatePost = () => {
 
     const { handleImageChange, imgUrl, setImgUrl} = usePreviewImage()
     const { loggedInUser } = useAuth()
+    const { setPosts, posts, addPost } = usePosts()
+    const { username } = useParams()
 
     const ImageRef = useRef(null)
     const showToast = useShowToast()
@@ -63,6 +67,11 @@ const CreatePost = () => {
         const response = await axios.post("/api/posts/create", { postedBy: loggedInUser._id, text: postText, img: imgUrl })
         const { data } = response
         console.log(data);
+        //addPost(data.newPost)
+        if(username === loggedInUser?.username) {
+          setPosts([data.newPost, ...posts])
+        }
+        
         showToast("Success", "success", "Post created successfully")
         setOpen(false)
         setPostText("")
@@ -90,13 +99,13 @@ const CreatePost = () => {
                     <Button
                         position={"fixed"}
                         bottom={10}
-                        right={10}
+                        right={5}
                         bg={useColorModeValue("gray.300", gray.dark)}
                         color={useColorModeValue(gray.dark, "gray.300")}
-                        
+                        size={{base: "sm", sm: "md"}}
                     >
                         <IoAdd />
-                        Post
+                        
                     </Button>
                 </DialogTrigger>
 

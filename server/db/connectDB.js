@@ -4,7 +4,7 @@ const connectDB= async() => {
     try{
         //"mongodb://localhost:27017/threadDB"  
       const MONGO_URI = process.env.MONGO_URI
-      const connect = await mongoose.connect("mongodb://localhost:27017/threadDB")
+      const connect = await mongoose.connect("mongodb://localhost:27017/threadDB" )
       console.log(`MongoDB Connected: ${connect.connection.host}`);
       
     }catch(error) {

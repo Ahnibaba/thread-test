@@ -5,13 +5,13 @@ import { useEffect, useState } from "react"
 import useShowToast from "@/hooks/useShowToast"
 import axios from "axios"
 import Post from "@/components/Post"
+import usePosts from "../../store/usePosts"
 
 
 const HomePage = () => {
-  const [posts, setPosts] = useState([])
   const [loading, setLoading] = useState(true)
 
-  const { loggedInUser } = useAuth()
+  const { setPosts, posts } = usePosts()
 
   const showToast = useShowToast()
 
@@ -23,6 +23,7 @@ const HomePage = () => {
   useEffect(() => {
     const getFeedPosts = async () => {
       setLoading(true)
+      setPosts([])
       try {
 
         const response = await axios.get("/api/posts/feed")
@@ -30,21 +31,29 @@ const HomePage = () => {
         console.log(data);
         setPosts(data)
 
-
       } catch (err) {
+        console.log(err);
         if (err.response?.data && err.response?.data?.error) {
           showToast("Error", "error", err.response.data.error)
         } else {
           showToast("Error", "error", err.response.statusText)
         }
-        console.log(err);
+        
 
       } finally {
         setLoading(false)
       }
     }
     getFeedPosts()
+
+    
   }, [])
+
+
+  
+  
+  
+  
   return (
     <>
 
@@ -57,7 +66,7 @@ const HomePage = () => {
       )}
       
       {posts.map((post) => (
-        <Post key={post._id} post={post} postedBy={post.postedBy.username} />
+        <Post key={post._id} post={post} postedBy={post.postedBy} />
       ))}
 
     </>

@@ -95,7 +95,7 @@ export default function UpdateProfilePage() {
                         <Stack direction={["column", "row"]} gap={6} justify={"center"} align={"center"} w={"full"}>
                             <Center>
                                 <Avatar.Root size={"2xl"}>
-                                    <Avatar.Fallback name="Segun Adebayo" />
+                                    <Avatar.Fallback name={loggedInUser?.name} />
                                     <Avatar.Image boxShadow={"md"} src={imgUrl || loggedInUser.profilePic} />
                                 </Avatar.Root>
                             </Center>

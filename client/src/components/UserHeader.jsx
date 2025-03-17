@@ -4,7 +4,7 @@ import { BsInstagram, BsMenuButton } from 'react-icons/bs'
 import { CgMoreO } from 'react-icons/cg'
 import { toaster } from './ui/toaster'
 import useAuth from '../../store/useAuth'
-import { Navigate, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { useState } from 'react'
 import axios from 'axios'
 import useShowToast from '../hooks/useShowToast'
@@ -14,7 +14,7 @@ import { Link as RouterLink } from "react-router-dom"
 const UserHeader = ({ user }) => {
     const { loggedInUser } = useAuth()
     const [following, setFollowing] = useState(user.followers.includes(loggedInUser?._id))
-    console.log(following);
+    
     const showToast = useShowToast()
     const [updating, setUpdating] = useState(false)
 
