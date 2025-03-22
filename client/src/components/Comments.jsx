@@ -52,7 +52,7 @@ const Comments = ({ reply, lastReply }) => {
                     
                 </Flex>
             </Flex>
-            {!lastReply ? <CustomDivider /> : null}
+            {!lastReply ? <CustomDivider light={"gray.200"} dark={gray.dark} /> : null}
         </>
 
     )

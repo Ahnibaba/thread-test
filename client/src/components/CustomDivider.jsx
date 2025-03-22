@@ -2,13 +2,13 @@ import { Box } from "@chakra-ui/react"
 import { useColorModeValue } from "./ui/color-mode"
 
 
-const CustomDivider = () => {
+const CustomDivider = ({ light, dark }) => {
     const gray = {
         dark: "#1e1e1e",
         light: "#616161"
     }
     return (
-        <Box borderBottom="1px solid" borderBottomColor={useColorModeValue("gray.200", gray.dark)} my={4}></Box>
+        <Box style={{margin: 0}} borderBottom="1px solid" borderBottomColor={useColorModeValue(light, dark)} my={4}></Box>
     )
 
 }

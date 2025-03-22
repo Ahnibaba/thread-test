@@ -6,6 +6,7 @@ import { Link } from "@chakra-ui/react";
 import { Link as RouterLink } from "react-router-dom"
 import { CgHome, CgProfile } from 'react-icons/cg'
 import LogoutButton from './LogoutButton';
+import { BsFillChatQuoteFill } from 'react-icons/bs';
 
 const Header = () => {
   const { toggleColorMode, colorMode } = useColorMode()
@@ -36,6 +37,9 @@ const Header = () => {
         <Flex alignItems={"center"} gap={3}>
           <Link as={RouterLink} to={`/${loggedInUser.username}`}>
             <CgProfile size={24} />
+          </Link>
+          <Link as={RouterLink} to={`/chat`}>
+            <BsFillChatQuoteFill size={24} />
           </Link>
           <LogoutButton />
         </Flex>

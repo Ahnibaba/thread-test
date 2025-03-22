@@ -18,8 +18,8 @@ const LogoutButton = () => {
     
     return (
         <Button
-          bg={useColorModeValue("gray.300", gray.dark)}
-          color={useColorModeValue(gray.dark, "gray.300")}
+          bg={useColorModeValue(gray.light, gray.dark)}
+          color={useColorModeValue(gray.dark, gray.light)}
           size={"xs"}
           onClick={logout}
           

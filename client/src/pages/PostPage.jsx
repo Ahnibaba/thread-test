@@ -113,7 +113,7 @@ const PostPage = () => {
       </Flex>
 
 
-      <CustomDivider />
+      <CustomDivider light={"gray.200"} dark={gray.dark}  />
 
       <Flex justifyContent={"space-between"}>
         <Flex gap={2} alignItems={"center"}>
@@ -125,7 +125,7 @@ const PostPage = () => {
         </Button>
       </Flex>
 
-      <CustomDivider />
+      <CustomDivider light={"gray.200"} dark={gray.dark}  />
 
 
        {currentPost.replies.map(reply => (

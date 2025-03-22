@@ -4,7 +4,7 @@ import './index.css'
 import App from './App.jsx'
 import { BrowserRouter } from 'react-router-dom'
 import { Provider } from './components/ui/provider'
-import { ClientOnly, Skeleton } from '@chakra-ui/react'
+import { Skeleton } from '@chakra-ui/react'
 
 const AppWrapper = () => {
   const [isClient, setIsClient] = useState(false);
