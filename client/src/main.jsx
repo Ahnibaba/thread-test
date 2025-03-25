@@ -5,6 +5,7 @@ import App from './App.jsx'
 import { BrowserRouter } from 'react-router-dom'
 import { Provider } from './components/ui/provider'
 import { Skeleton } from '@chakra-ui/react'
+import { SocketContextProvider } from './context/SocketContext'
 
 const AppWrapper = () => {
   const [isClient, setIsClient] = useState(false);
@@ -22,7 +23,9 @@ createRoot(document.getElementById('root')).render(
   <StrictMode>
       <BrowserRouter>
         <Provider>
-           <AppWrapper />
+           <SocketContextProvider>
+             <AppWrapper />
+           </SocketContextProvider>
         </Provider>
       </BrowserRouter>
   </StrictMode>,

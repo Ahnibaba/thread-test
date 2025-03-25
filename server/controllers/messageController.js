@@ -1,5 +1,6 @@
 import conversationModel from "../models/conversationModel.js";
 import messageModel from "../models/messageModel.js";
+import { getRecipientSocketId, io } from "../socket/socket.js";
 
 async function sendMessage(req, res){
   try {
@@ -28,14 +29,26 @@ async function sendMessage(req, res){
     })
 
     await Promise.all([
-        newMessage.save(),
-        conversationModel.updateOne({
-            lastMessage: {
-                text: message,
-                sender: senderId
-            }
-        })
-    ])
+      newMessage.save(),
+      conversationModel.updateOne(
+          { _id: conversation._id }, // Filter: specify which conversation to update
+          { 
+              $set: { 
+                  lastMessage: {
+                      text: message,
+                      sender: senderId
+                  }
+              }
+          }
+      )
+  ]);
+  
+
+
+    const recipientSocketId = getRecipientSocketId(recipientId)
+    if (recipientSocketId) {
+      io.to(recipientSocketId).emit("newMessage", newMessage)
+    }
 
     res.status(201).json(newMessage)
 
@@ -79,6 +92,14 @@ async function  getConversations(req, res) {
     const conversations = await conversationModel.find({ participants: userId }).populate({
       path: "participants",
       select: "username profilePic"
+    })
+
+    //remove the current user from the participant array
+
+    conversations.forEach(conversation => {
+      conversation.participants = conversation.participants.filter(
+        participant => participant._id.toString() !== userId.toString()
+      )
     })
 
     res.status(200).json(conversations)

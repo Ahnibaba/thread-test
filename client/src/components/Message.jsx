@@ -1,7 +1,14 @@
-import { Text, Avatar, Flex } from '@chakra-ui/react'
+import { Text, Avatar, Flex, Box } from '@chakra-ui/react'
 import React from 'react'
+import useConversations from '../../store/useConversations'
+import useAuth from '../../store/useAuth'
+import { BsCheck2All } from 'react-icons/bs'
 
-const Message = ({ ownMessage }) => {
+const Message = ({ message, ownMessage }) => {
+
+    const { selectedConversation } = useConversations()
+    const { loggedInUser } = useAuth()
+
     return (
         <>
             {ownMessage ? (
@@ -9,20 +16,18 @@ const Message = ({ ownMessage }) => {
                     gap={2}
                     alignSelf={"flex-end"}
                 >
-                    <Text
-                        maxW={"350px"}
-                        bg={"blue.400"}
-                        p={1}
-                        borderRadius={"md"}
-                    >
-                        Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                    </Text>
+                    <Flex bg={"green.800"} maxW={"350px"} p={1} borderRadius={"md"}>
+                       <Text color={"white"}>{message.text}</Text>
+                       <Box alignSelf={"flex-end"} ml={1} color={message.seen ? "blue.400" : ""} fontWeight={"bold"}>
+                          <BsCheck2All size={16} />
+                       </Box>
+                    </Flex>
                     <Avatar.Root size={"sm"}
                       w={7}
                       h={7}
                     >
                         <Avatar.Fallback src="https://bit.ly/broken-link" />
-                        <Avatar.Image src="https://bit.ly/broken-link" />
+                        <Avatar.Image src={loggedInUser?.profilePic || null} />
                     </Avatar.Root>
 
                 </Flex>
@@ -35,7 +40,7 @@ const Message = ({ ownMessage }) => {
                       h={7}
                     >
                         <Avatar.Fallback src="https://bit.ly/broken-link" />
-                        <Avatar.Image src="https://bit.ly/broken-link" />
+                        <Avatar.Image src={selectedConversation?.userProfilePics || null} />
                     </Avatar.Root>
                     <Text
                         maxW={"350px"}
@@ -44,7 +49,7 @@ const Message = ({ ownMessage }) => {
                         borderRadius={"md"}
                         color={"black"}
                     >
-                        Lorem ipsum dolor sit amet consectetur adipisicing elit. 
+                       {message.text} 
                     </Text>
 
                 </Flex>
