@@ -4,6 +4,8 @@ import { Avatar } from '@chakra-ui/react'
 import useAuth from '../../store/useAuth'
 import { BsCheck2All } from 'react-icons/bs'
 import useConversations from '../../store/useConversations'
+import useMessages from '../../store/useMessages'
+import { useState } from 'react'
 
 
 const Conversation = ({ conversation, isOnline }) => {
@@ -13,6 +15,8 @@ const Conversation = ({ conversation, isOnline }) => {
     light: "#616161"
 }
 
+
+
   const user = conversation.participants[0]
   const lastMessage = conversation.lastMessage
   
@@ -20,10 +24,14 @@ const Conversation = ({ conversation, isOnline }) => {
   const { loggedInUser } = useAuth()
   const { selectedConversation, setSelectedConversation } = useConversations()
   const { toggleColorMode } = useColorMode()
+  const { typing } = useMessages()
+
 
   const bg = useColorModeValue("gray.400", gray.dark)
 
   console.log("selectedConversation", selectedConversation);
+
+  
   
   
   return (
@@ -85,7 +93,10 @@ const Conversation = ({ conversation, isOnline }) => {
               </Box>
             ) : ""}
             <Text>
-            {lastMessage.text.length > 18 ? lastMessage.text.substring(0, 18) + "..." : lastMessage.text}
+             {
+              conversation?._id === selectedConversation?._id && typing ? typing
+              : lastMessage.text.length > 18 ? lastMessage.text.substring(0, 18) + "..." : lastMessage.text
+             }
            </Text>
            </Flex>
            

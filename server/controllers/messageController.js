@@ -50,6 +50,8 @@ async function sendMessage(req, res){
       io.to(recipientSocketId).emit("newMessage", newMessage)
     }
 
+    
+
     res.status(201).json(newMessage)
 
   } catch (error) {

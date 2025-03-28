@@ -12,7 +12,9 @@ const useConversations = create((set) => ({
             username: "",
             userProfilePic: ""
     },
-    setSelectedConversation: (selectedConversation) => set({ selectedConversation })
+    setSelectedConversation: (selectedConversation) => set({ selectedConversation }),
+    updateMessages: (newMessage) => set((state) => ({ messages: [...state.messages, newMessage] })),
+
 }))
 
 export default useConversations

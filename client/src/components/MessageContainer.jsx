@@ -17,11 +17,15 @@ const MessageContainer = () => {
   //const [messages, setMessages] = useState([])
 
   const { selectedConversation, setConversations, conversations } = useConversations()
+  const { messages, setMessages } = useMessages()
   const { loggedInUser } = useAuth()
-  const { messages, setMessages, updateMessages } = useMessages()
+  const { typing, setTyping } = useMessages()
   const { socket } = useSocket()
 
   const messageEndRef = useRef(null)
+
+ 
+  
 
 
   const showToast = useShowToast()
@@ -30,10 +34,15 @@ const MessageContainer = () => {
         dark: "#1e1e1e",
         light: "#616161"
     }
+    
 
     useEffect(() => {
       socket.on("newMessage", (message) => {
-       updateMessages(messages)
+       if(selectedConversation?._id === message.conversationId) {
+        // updateMessages(messages)
+        setTyping("")
+        setMessages([...messages, message])
+       }
         
         const updatedConversations = conversations.map(conversation => {
           if(conversation._id === message.conversationId) {
@@ -44,8 +53,10 @@ const MessageContainer = () => {
         setConversations(updatedConversations)
       })
 
-      return () => socket.off("newMessage")
-    }, [socket])
+      return () => {
+        socket.off("newMessage")
+      }
+    }, [messages])
 
 
     useEffect(() => {
@@ -68,8 +79,20 @@ const MessageContainer = () => {
 
           setMessages(updatedMessages)
         }
+
+        const test = conversations.map(conversation => {
+       
+          if (conversation._id === conversationId) {
+            return { ...conversation, lastMessage: { ...conversation.lastMessage, seen: true } }
+          }
+          return conversation
+        })
+        setConversations(test);
       })
+
+      
     }, [socket, loggedInUser?._id, messages, selectedConversation])
+
 
     useEffect(() => {
       messageEndRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -100,6 +123,9 @@ const MessageContainer = () => {
 
     
 
+
+    
+
   return (
     <Flex flex={70}
      bg={useColorModeValue("gray.200", gray.dark)}
@@ -108,7 +134,8 @@ const MessageContainer = () => {
      flexDirection={"column"}
     >
       {/* Message header */}
-      <Flex w={"full"} h={12} alignItems={"center"} gap={2}>
+      <Flex w={"full"} h={12} flexDirection={"column"}>
+         <Flex gap={2}>
          <Avatar.Root size={"sm"}>
            <Avatar.Fallback src="https://bit.ly/broken-link" />
            <Avatar.Image src={selectedConversation?.userProfilePics || null} /> 
@@ -116,7 +143,12 @@ const MessageContainer = () => {
          <Text display={"flex"} alignItems={"center"}>
             {selectedConversation?.username} <Image src="/verified.png" w={4} h={4} ml={1} />
          </Text>
+         </Flex>
+         <Flex>
+          <Text w={"xs"} mt={"-10px"} ml={"44px"}>{typing}</Text>
+         </Flex>
       </Flex>
+  
         <CustomDivider light={gray.dark} dark={"gray.700"}  />
 
         <Flex 

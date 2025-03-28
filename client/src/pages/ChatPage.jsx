@@ -19,11 +19,11 @@ const ChatPage = ({ conversation }) => {
   const [loadingConversations, setLoadingConversations] = useState(true)
   const [searchText, setSearchText] = useState("")
   const [searchingUser, setSearchingUser] = useState(false)
-
   const { conversations, setConversations, selectedConversation, setSelectedConversation, searchConversations, setSearchConversations } = useConversations()
-  const { messages } = useMessages()
   const { loggedInUser } = useAuth()
   const { socket, onlineUsers } = useSocket()
+  const { typing } = useMessages()
+  const { messages } = useMessages()
 
   const gray = {
     dark: "#1e1e1e",
@@ -31,36 +31,27 @@ const ChatPage = ({ conversation }) => {
   }
 
 
-  useEffect(() => {
-       socket?.on("messagesSeen", ({ conversationId }) => {
-    const { conversations, setConversations } = useConversations.getState();
 
-    const test = conversations.map(conversation => {
-      if(conversation._id === conversationId) {
-       return { ...conversation, lastMessage: { ...conversation.lastMessage, seen: true }}
+  socket.on("sendChanges", (conversationData) => {
+
+
+    const updatedConversations = conversations.map(conversation => {
+      if (conversation._id === conversationData._id) {
+        return { ...conversation, lastMessage: { ...conversation.lastMessage, seen: conversationData.lastMessage.seen, sender: conversationData.lastMessage.sender, text: typing ? typing : conversationData.lastMessage.text } }
       }
       return conversation
     })
+    setConversations(updatedConversations)
 
-    // const updatedConversations = conversations.map((conversation) =>
-    //   conversation._id === conversationId
-    //     ? {
-    //         ...conversation,
-    //         lastMessage: {
-    //           ...conversation.lastMessage,
-    //           seen: true,
-    //         },
-    //       }
-    //     : conversation
-    // );
 
-    setConversations(test);
+  })
 
-      //setConversations(updatedConversations)
-    })
-  }, [socket, setConversations])
+  socket.on("getAllConversations", (conversations) => {
+    setConversations(conversations)
+  })
 
-  
+
+
   useEffect(() => {
     const getConversations = async () => {
       try {
@@ -79,7 +70,7 @@ const ChatPage = ({ conversation }) => {
     }
 
     getConversations()
-  }, [messages])
+  }, [])
 
 
 
@@ -107,22 +98,26 @@ const ChatPage = ({ conversation }) => {
         return
       }
 
-      const mockConversation = {
-        mock: true,
-        lastMessage: {
-          text: "",
-          sender: ""
-        },
-        _id: Date.now(),
-        participants: [{
-          _id: searchedUser?._id,
-          username: searchedUser?.username,
-          profilePic: searchedUser?.profilePic
-      }]
+      if (searchedUser?.username !== loggedInUser?.username) {
+        const mockConversation = {
+          mock: true,
+          lastMessage: {
+            text: "",
+            sender: ""
+          },
+          _id: Date.now(),
+          participants: [{
+            _id: searchedUser?._id,
+            username: searchedUser?.username,
+            profilePic: searchedUser?.profilePic
+          }]
+        }
+
+        setConversations([...conversations, mockConversation])
       }
 
 
-      setConversations([...conversations, mockConversation])
+
 
 
     } catch (error) {
@@ -147,7 +142,7 @@ const ChatPage = ({ conversation }) => {
 
       setSearchConversations(searchedConversation);
 
-    }else {
+    } else {
       setSearchConversations(conversations)
     }
   };
