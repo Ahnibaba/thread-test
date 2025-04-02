@@ -20,6 +20,14 @@ async function sendMessage(req, res){
         }
       })
       await conversation.save()
+
+      const recipientSocketId = getRecipientSocketId(recipientId)
+      if (recipientSocketId) {
+        console.log(conversation);
+        
+        io.to(recipientSocketId).emit("newConversation", conversation)
+      }
+
     }
 
     const newMessage = new messageModel({
@@ -47,7 +55,7 @@ async function sendMessage(req, res){
 
     const recipientSocketId = getRecipientSocketId(recipientId)
     if (recipientSocketId) {
-      io.to(recipientSocketId).emit("newMessage", newMessage)
+      io.to(recipientSocketId).emit("newMessage", { message: newMessage })
     }
 
     

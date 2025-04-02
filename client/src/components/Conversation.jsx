@@ -6,6 +6,7 @@ import { BsCheck2All } from 'react-icons/bs'
 import useConversations from '../../store/useConversations'
 import useMessages from '../../store/useMessages'
 import { useState } from 'react'
+import { useSocket } from '@/context/SocketContext'
 
 
 const Conversation = ({ conversation, isOnline }) => {
@@ -25,15 +26,21 @@ const Conversation = ({ conversation, isOnline }) => {
   const { selectedConversation, setSelectedConversation } = useConversations()
   const { toggleColorMode } = useColorMode()
   const { typing } = useMessages()
+  const { socket } = useSocket()
+
+  const [check, setCheck] = useState(null)
 
 
   const bg = useColorModeValue("gray.400", gray.dark)
 
   console.log("selectedConversation", selectedConversation);
 
-  
-  
-  
+  socket.on("typing", ({ conversationId }) => {
+    setCheck(conversationId)
+  })
+
+
+
   return (
     <Flex
      gap={4}
@@ -94,7 +101,7 @@ const Conversation = ({ conversation, isOnline }) => {
             ) : ""}
             <Text>
              {
-              conversation?._id === selectedConversation?._id && typing ? typing
+               (check === selectedConversation._id && check === conversation?._id && typing) ? typing
               : lastMessage.text.length > 18 ? lastMessage.text.substring(0, 18) + "..." : lastMessage.text
              }
            </Text>

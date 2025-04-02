@@ -14,10 +14,11 @@ import useMessages from '../../store/useMessages'
 const MessageContainer = () => {
 
   const [loadingMessages, setLoadingMessages] = useState(true)
-  //const [messages, setMessages] = useState([])
+  const [messages, setMessages] = useState([])
+  const [check, setCheck] = useState(null)
 
-  const { selectedConversation, setConversations, conversations } = useConversations()
-  const { messages, setMessages } = useMessages()
+  const { setSelectedConversation, selectedConversation, setConversations, conversations } = useConversations()
+  //const { messages, setMessages, updateMessages } = useMessages()
   const { loggedInUser } = useAuth()
   const { typing, setTyping } = useMessages()
   const { socket } = useSocket()
@@ -34,14 +35,16 @@ const MessageContainer = () => {
         dark: "#1e1e1e",
         light: "#616161"
     }
-    
+
+
 
     useEffect(() => {
-      socket.on("newMessage", (message) => {
+      socket.on("newMessage", ({ message }) => {
        if(selectedConversation?._id === message.conversationId) {
-        // updateMessages(messages)
         setTyping("")
-        setMessages([...messages, message])
+        //updateMessages(messages)
+
+        setMessages(prev => [...prev, message])
        }
         
         const updatedConversations = conversations.map(conversation => {
@@ -56,7 +59,7 @@ const MessageContainer = () => {
       return () => {
         socket.off("newMessage")
       }
-    }, [messages])
+    }, [socket, selectedConversation, messages, setConversations])
 
 
     useEffect(() => {
@@ -102,7 +105,7 @@ const MessageContainer = () => {
     useEffect(() => {
       const getMessages = async () => {
         setLoadingMessages(true)
-        //setMessages([])
+        setMessages([])
         try {
           if(selectedConversation.mock) return
           const response = await axios.get(`/api/messages/${selectedConversation?.userId}`)
@@ -121,6 +124,11 @@ const MessageContainer = () => {
     }, [selectedConversation?.userId, selectedConversation.mock])
 
 
+
+    socket.on("typing", ({ conversationId }) => {
+      setCheck(conversationId)
+    })
+  
     
 
 
@@ -145,7 +153,7 @@ const MessageContainer = () => {
          </Text>
          </Flex>
          <Flex>
-          <Text w={"xs"} mt={"-10px"} ml={"44px"}>{typing}</Text>
+          <Text w={"xs"} mt={"-10px"} ml={"44px"}>{check === selectedConversation?._id ? typing : ""}</Text>
          </Flex>
       </Flex>
   
@@ -194,7 +202,7 @@ const MessageContainer = () => {
 
         </Flex>
 
-        <MessageInput />
+        <MessageInput messages={messages} setMessages={setMessages} />
     </Flex>
   )
 }

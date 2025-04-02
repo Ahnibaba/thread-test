@@ -8,56 +8,57 @@ import conversationModel from "../models/conversationModel.js"
 const app = express()
 const server = http.createServer(app)
 const io = new Server(server, {
-    cors: {
-      origin: "http://localhost:3000",
-      methods: ["GET", "POST"]
-    }
+  cors: {
+    origin: "http://localhost:3000",
+    methods: ["GET", "POST"]
+  }
 })
 
 const userSocketMap = {}
 
 export const getRecipientSocketId = (recipientId) => {
-   return userSocketMap[recipientId]
+  return userSocketMap[recipientId]
 }
 
 
 io.on("connection", (socket) => {
-   console.log("user connected", socket.id);
-   const userId = socket.handshake.query.userId
+  console.log("user connected", socket.id);
+  const userId = socket.handshake.query.userId
 
-   if(userId !== "undefined") {
-     userSocketMap[userId] = socket.id
-   }
+  if (userId !== "undefined") {
+    userSocketMap[userId] = socket.id
+  }
 
 
-   io.emit("getOnlineUsers", Object.keys(userSocketMap))
+  io.emit("getOnlineUsers", Object.keys(userSocketMap))
 
-   socket.on("markMessagesAsSeen", async({ conversationId, userId }) => {
+
+  socket.on("markMessagesAsSeen", async ({ conversationId, userId }) => {
     console.log("conversationId", conversationId);
     console.log("userid", userId);
-    
-    
+
+
     try {
       await messageModel.updateMany(
-        {conversationId: conversationId, seen: false},
+        { conversationId: conversationId, seen: false },
         {
           $set: { seen: true }
         }
       )
       await conversationModel.updateOne(
-         { _id: conversationId },
-         { $set: { "lastMessage.seen": true } }
+        { _id: conversationId },
+        { $set: { "lastMessage.seen": true } }
       )
 
- 
+
       io.to(userSocketMap[userId]).emit("messagesSeen", { conversationId })
     } catch (error) {
       console.log(error);
-      
-    }
-   })
 
-   socket.on("sendChanges", async ({ data, recipientId }) => {
+    }
+  })
+
+  socket.on("sendChanges", async ({ data, recipientId }) => {
     let conversationData = await conversationModel.findOne({ _id: data.conversationId }).populate({
       path: "participants",
       select: "username profilePic"
@@ -66,37 +67,40 @@ io.on("connection", (socket) => {
     const update = conversationData.participants.filter(e => e._id.toString() !== recipientId.toString())
 
     conversationData.participants = update
-  
+
     io.to(userSocketMap[recipientId]).emit("sendChanges", conversationData)
   })
 
-  socket.on("typing", ({ recipientId, text }) => {
+  socket.on("typing", ({ recipientId, text, conversationId }) => {
 
-      io.to(userSocketMap[recipientId]).emit("typing", text)
-      
+    io.to(userSocketMap[recipientId]).emit("typing", { text, conversationId })
+
   })
 
 
-  socket.on("getAllConversations", async({ recipientId }) => {
-    const conversations = await conversationModel.find().populate({
+  socket.on("getUserConversations", async ({ recipientId, user }) => {
+    const conversations = await conversationModel.find({ participants: { $in: [recipientId] } }).populate({
       path: "participants",
       select: "username profilePic"
     })
-    
-    console.log("333", conversations);
 
-    io.to(userSocketMap[recipientId]).emit("getAllConversations", conversations)
+    conversations.forEach(conversation => {
+      conversation.participants = conversation.participants.filter(
+        participant => participant._id.toString() !== recipientId.toString()
+      )
+    })
+    io.to(userSocketMap[recipientId]).emit("getUserConversations", conversations)
 
- })
+  })
 
 
-   socket.on("disconnect", () => {
+  socket.on("disconnect", () => {
     console.log("user disconnected")
     delete userSocketMap[userId]
     io.emit("getOnlineUsers", Object.keys(userSocketMap))
-    
-   })
-    
+
+  })
+
 })
 
 

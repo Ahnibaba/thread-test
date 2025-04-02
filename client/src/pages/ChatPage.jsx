@@ -13,7 +13,7 @@ import { IoReturnDownBack } from 'react-icons/io5'
 import { useSocket } from '@/context/SocketContext'
 import useMessages from '../../store/useMessages'
 
-const ChatPage = ({ conversation }) => {
+const ChatPage = () => {
   const showToast = useShowToast()
 
   const [loadingConversations, setLoadingConversations] = useState(true)
@@ -23,7 +23,7 @@ const ChatPage = ({ conversation }) => {
   const { loggedInUser } = useAuth()
   const { socket, onlineUsers } = useSocket()
   const { typing } = useMessages()
-  const { messages } = useMessages()
+ 
 
   const gray = {
     dark: "#1e1e1e",
@@ -31,23 +31,38 @@ const ChatPage = ({ conversation }) => {
   }
 
 
+  
 
-  socket.on("sendChanges", (conversationData) => {
+   
+
+    socket.on("sendChanges", (conversationData) => {
 
 
+      const updatedConversations = conversations.map(conversation => {
+        if (conversation._id === conversationData._id) {
+          return { ...conversation, lastMessage: { ...conversation.lastMessage, seen: conversationData.lastMessage.seen, sender: conversationData.lastMessage.sender, text: typing ? typing : conversationData.lastMessage.text } }
+        }
+        return conversation
+      })
+      setConversations(updatedConversations)
+  
+  
+    })
+  
+    socket.on("getUserConversations", (conversations) => {
+      setConversations(conversations)
+    })
+
+
+  socket.on("showTypingOnConversation", (typingConversation) => {
     const updatedConversations = conversations.map(conversation => {
-      if (conversation._id === conversationData._id) {
-        return { ...conversation, lastMessage: { ...conversation.lastMessage, seen: conversationData.lastMessage.seen, sender: conversationData.lastMessage.sender, text: typing ? typing : conversationData.lastMessage.text } }
+      if(typingConversation._id === conversation._id){
+        return { ...conversation, lastMessage: { ...conversation.lastMessage, text: typing ? typing : conversation.lastMessage.text } }
       }
       return conversation
     })
+
     setConversations(updatedConversations)
-
-
-  })
-
-  socket.on("getAllConversations", (conversations) => {
-    setConversations(conversations)
   })
 
 
@@ -81,7 +96,6 @@ const ChatPage = ({ conversation }) => {
     try {
       const { data: searchedUser } = await axios.get(`/api/users/profile/${searchText}`)
 
-
       const messagingYourself = searchedUser?._id === loggedInUser?._id
       if (messagingYourself) {
         showToast("Error", "error", "You cannot message yourself")
@@ -114,14 +128,16 @@ const ChatPage = ({ conversation }) => {
         }
 
         setConversations([...conversations, mockConversation])
-      }
-
-
-
+      
+     }
 
 
     } catch (error) {
       console.log(error);
+      if (error.status === 404) {
+        showToast("Error", "error", error.response.data.error)
+        return 
+      }
       showToast("Error", "error", error)
     } finally {
       setSearchingUser(false)
@@ -246,7 +262,7 @@ const ChatPage = ({ conversation }) => {
           </Flex>
         )}
 
-        {selectedConversation._id && <MessageContainer />}
+        {selectedConversation?._id && <MessageContainer />}
 
       </Flex>
     </Box>

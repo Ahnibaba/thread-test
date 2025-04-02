@@ -8,11 +8,10 @@ import postModel from "../models/postModel.js"
 const getUserProfile = async (req, res) => {
     //We will fetch user profile either with username or userId
     //query is either username or userId
-    const { query } = req.params
-
-
+   
 
     try {
+        const { query } = req.params
         let user
 
         //query is userId
@@ -24,7 +23,9 @@ const getUserProfile = async (req, res) => {
         }
 
 
-        if (!user) return res.status(404).json({ error: "User not found" })
+        if (!user) {
+            return res.status(404).json({ error: "User not found" })
+        }    
 
         res.status(200).json(user)
 
