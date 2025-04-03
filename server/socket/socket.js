@@ -93,6 +93,22 @@ io.on("connection", (socket) => {
 
   })
 
+  socket.on("conversationTyping", async ({ recipientId, user }) => {
+    const conversationData = await conversationModel.findOne({ participants: { $all: [recipientId, user] } })
+    console.log(conversationData);
+    
+   
+    io.to(userSocketMap[recipientId]).emit("conversationTyping", conversationData)
+  })
+
+  socket.on("stopTyping", async ({ recipientId, user }) => {
+
+    const conversationData = await conversationModel.findOne({ participants: { $all: [recipientId, user] } })
+  
+    io.to(userSocketMap[recipientId]).emit("stopTyping", conversationData);
+  });
+  
+
 
   socket.on("disconnect", () => {
     console.log("user disconnected")

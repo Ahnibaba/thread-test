@@ -22,8 +22,9 @@ const ChatPage = () => {
   const { conversations, setConversations, selectedConversation, setSelectedConversation, searchConversations, setSearchConversations } = useConversations()
   const { loggedInUser } = useAuth()
   const { socket, onlineUsers } = useSocket()
-  const { typing } = useMessages()
- 
+  const { typing, messageText } = useMessages()
+
+  
 
   const gray = {
     dark: "#1e1e1e",
@@ -31,39 +32,73 @@ const ChatPage = () => {
   }
 
 
-  
 
-   
 
-    socket.on("sendChanges", (conversationData) => {
+
+
+  socket.on("sendChanges", (conversationData) => {
+
+
+    const updatedConversations = conversations.map(conversation => {
+      if (conversation._id === conversationData._id) {
+        return { ...conversation, lastMessage: { ...conversation.lastMessage, seen: conversationData.lastMessage.seen, sender: conversationData.lastMessage.sender, text: typing ? typing : conversationData.lastMessage.text } }
+      }
+      return conversation
+    })
+    setConversations(updatedConversations)
+
+
+  })
+
+  socket.on("getUserConversations", (conversations) => {
+    setConversations(conversations)
+  })
+
+
+  useEffect(() => {
+    
+    socket.on("conversationTyping", (conversationData) => {
+      console.log(conversationData);
+      console.log(conversations);
 
 
       const updatedConversations = conversations.map(conversation => {
         if (conversation._id === conversationData._id) {
-          return { ...conversation, lastMessage: { ...conversation.lastMessage, seen: conversationData.lastMessage.seen, sender: conversationData.lastMessage.sender, text: typing ? typing : conversationData.lastMessage.text } }
+
+          return { ...conversation, lastMessage: { ...conversation.lastMessage, text: "...typing" } }
         }
         return conversation
       })
+
+      console.log(updatedConversations);
+
+
       setConversations(updatedConversations)
-  
-  
-    })
-  
-    socket.on("getUserConversations", (conversations) => {
-      setConversations(conversations)
+
     })
 
+    socket.on("stopTyping", (conversationData) => {
+      const updatedConversations = conversations.map((conversation) => {
+        if (conversation._id === conversationData._id) {
+          return {
+            ...conversation,
+            lastMessage: { ...conversation.lastMessage, text: conversationData.lastMessage.text }
+          };
+        }
+        return conversation;
+      });
 
-  socket.on("showTypingOnConversation", (typingConversation) => {
-    const updatedConversations = conversations.map(conversation => {
-      if(typingConversation._id === conversation._id){
-        return { ...conversation, lastMessage: { ...conversation.lastMessage, text: typing ? typing : conversation.lastMessage.text } }
-      }
-      return conversation
-    })
+      setConversations(updatedConversations);
+    });
 
-    setConversations(updatedConversations)
-  })
+
+
+    return () => {
+      socket.off("conversationTyping")
+    }
+  }, [messageText, conversations])
+
+
 
 
 
@@ -74,6 +109,9 @@ const ChatPage = () => {
         const { data } = response
         console.log(data);
         setConversations(data)
+
+        console.log(conversations);
+
 
       } catch (error) {
         console.log(error);
@@ -128,15 +166,15 @@ const ChatPage = () => {
         }
 
         setConversations([...conversations, mockConversation])
-      
-     }
+
+      }
 
 
     } catch (error) {
       console.log(error);
       if (error.status === 404) {
         showToast("Error", "error", error.response.data.error)
-        return 
+        return
       }
       showToast("Error", "error", error)
     } finally {

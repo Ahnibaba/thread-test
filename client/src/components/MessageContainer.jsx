@@ -59,7 +59,7 @@ const MessageContainer = () => {
       return () => {
         socket.off("newMessage")
       }
-    }, [socket, selectedConversation, messages, setConversations])
+    }, [socket, selectedConversation, messages, setConversations, conversations])
 
 
     useEffect(() => {

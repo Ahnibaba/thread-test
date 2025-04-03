@@ -5,7 +5,7 @@ import useAuth from '../../store/useAuth'
 import { BsCheck2All } from 'react-icons/bs'
 import useConversations from '../../store/useConversations'
 import useMessages from '../../store/useMessages'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useSocket } from '@/context/SocketContext'
 
 
@@ -23,9 +23,9 @@ const Conversation = ({ conversation, isOnline }) => {
   
 
   const { loggedInUser } = useAuth()
-  const { selectedConversation, setSelectedConversation } = useConversations()
+  const { selectedConversation, setSelectedConversation, setConversations, conversations } = useConversations()
   const { toggleColorMode } = useColorMode()
-  const { typing } = useMessages()
+  const { typing, messageText } = useMessages()
   const { socket } = useSocket()
 
   const [check, setCheck] = useState(null)
@@ -39,6 +39,7 @@ const Conversation = ({ conversation, isOnline }) => {
     setCheck(conversationId)
   })
 
+  
 
 
   return (
@@ -101,8 +102,7 @@ const Conversation = ({ conversation, isOnline }) => {
             ) : ""}
             <Text>
              {
-               (check === selectedConversation._id && check === conversation?._id && typing) ? typing
-              : lastMessage.text.length > 18 ? lastMessage.text.substring(0, 18) + "..." : lastMessage.text
+              lastMessage.text.length > 18 ? lastMessage.text.substring(0, 18) + "..." : lastMessage.text
              }
            </Text>
            </Flex>

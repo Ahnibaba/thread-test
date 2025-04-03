@@ -6,6 +6,8 @@ const useMessages = create((set) => ({
     updateMessages: (newMessage) => set((state) => ({ messages: [...state.messages, newMessage] })),
     typing: "",
     setTyping: (typing) => set({ typing }),
+    messageText: "",
+    setMessageText: (messageText) => set({ messageText }),
 
     
 }))
