@@ -169,7 +169,7 @@ const Actions = ({ post}) => {
 						</DialogHeader>
 						<DialogBody pb="4">
 							<Stack gap="4">
-								<Field label="First Name">
+								<Field>
 									<Input
 									 placeholder="Reply goes here.."
 									 onChange={(e) => setReply(e.target.value)}
