@@ -8,7 +8,7 @@ import postModel from "../models/postModel.js"
 const getUserProfile = async (req, res) => {
     //We will fetch user profile either with username or userId
     //query is either username or userId
-   
+
 
     try {
         const { query } = req.params
@@ -25,7 +25,7 @@ const getUserProfile = async (req, res) => {
 
         if (!user) {
             return res.status(404).json({ error: "User not found" })
-        }    
+        }
 
         res.status(200).json(user)
 
@@ -91,6 +91,11 @@ const loginUser = async (req, res) => {
         const isPasswordCorrect = await bcrypt.compare(password, user?.password || "")
 
         if (!user || !isPasswordCorrect) return res.status(400).json({ error: "Invalid username or password" })
+
+        if(user.isFrozen){
+         user.isFrozen = false
+         await user.save()
+        }  
 
         generateTokenAndSetCookies(user._id, res)
 
@@ -204,6 +209,91 @@ const updateUser = async (req, res) => {
     }
 }
 
+const getSuggestedUsers = async (req, res) => {
+
+    try {
+        // exclude the logged in user from suggested users array,
+        //exclude users that the current user is already following
+        const userId = req.user._id
+
+        const userFollowedByYou = await userModel.findById(userId).select("following")
+       
+        
+
+        const users = await userModel.aggregate([
+            {
+                $match: {
+                    _id: {$ne: userId}
+                }
+            },
+            {
+                $sample: {size:10}
+            }
+        ])
+
+        const filteredUsers = users.filter(user => !userFollowedByYou.following.includes(user._id))
+        const suggestedUsers = filteredUsers.slice(0,4)
+
+        suggestedUsers.forEach(user => user.password = null)
+
+        res.status(200).json(suggestedUsers)
+        
+    } catch (error) {
+    res.status(500).json({ error: error })
+    console.log("Error in getSuggestedUsers: ", error);
+   }
 
 
-export { signupUser, loginUser, logoutUser, followUnFollowUser, updateUser, getUserProfile }
+
+
+    //GREAT IDEA
+    // try {
+    //   let suggestedUsers = [];
+
+    //   const userDetails = await userModel.findById(req.user._id).populate("following");
+
+
+
+    //   await Promise.all(
+    //     userDetails.following.map(async (followedUser) => {
+    //       const populated = await userModel.findById(followedUser._id).populate("following");
+    //       suggestedUsers.push(...populated.following);
+
+    //     })
+    //   );
+
+    //   // Flatten and dedupe
+    //   const acceptedUsers = suggestedUsers.filter(
+    //     (user, index, self) =>
+    //       index === self.findIndex((u) => u._id.toString() === user._id.toString() && u._id.toString() !== req.user._id.toString() && !userDetails.followers.includes(user._id))
+    //   );
+
+    //   res.status(200).json(acceptedUsers);
+    // } catch (error) {
+    //   console.error("Error in getSuggestedUsers:", error);
+    //   res.status(500).json({ error: error.message });
+    // }
+  };
+
+
+  const freezeAccount = async (req, res) => {
+    try {
+        const user = await userModel.findById(req.user._id)
+        if(!user) {
+            return res.status(404).json({ error: "User not found" })
+        }
+
+        user.isFrozen = true
+        await user.save()
+
+        res.status(200).json({ success: true })
+        
+    } catch (error) {
+     console.error("Error in freezeAccount:", error);
+     res.status(500).json({ error: error.message });
+    }
+  } 
+
+
+
+export { signupUser, loginUser, logoutUser, followUnFollowUser, updateUser, getUserProfile, getSuggestedUsers, freezeAccount }

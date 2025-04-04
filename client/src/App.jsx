@@ -1,6 +1,6 @@
 import { Box, Button, Container } from "@chakra-ui/react";
 import React from "react";
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import UserPage from "./pages/UserPage";
 import PostPage from "./pages/PostPage";
 import Header from "./components/Header";
@@ -11,16 +11,19 @@ import useAuth from "../store/useAuth";
 import UpdateProfilePage from "./pages/UpdateProfilePage";
 import CreatePost from "./components/CreatePost";
 import ChatPage from "./pages/ChatPage";
+import SettingsPage from "./pages/SettingsPage";
+
 
 
 const App = () => {
   const { loggedInUser } = useAuth()
+  const { pathname } = useLocation()
 
 
 
   return (
     <Box position={"relative"} w={"full"}>
-      <Container maxW="620px">
+      <Container maxW={pathname === "/" ? { base: "620px", md: "900px" } : "620px"}>
         <Toaster />
         <Header />
         <Routes>
@@ -39,6 +42,7 @@ const App = () => {
           <Route path="/:username/post/:pid" element={<PostPage />} />
           <Route path="/update" element={loggedInUser ? <UpdateProfilePage /> : <Navigate to="/auth" />} />
           <Route path="/chat" element={loggedInUser ? <ChatPage /> : <Navigate to="/auth" />} />
+          <Route path="/settings" element={loggedInUser ? <SettingsPage /> : <Navigate to="/auth" />} />
         </Routes>
 
 

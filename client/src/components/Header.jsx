@@ -7,6 +7,7 @@ import { Link as RouterLink } from "react-router-dom"
 import { CgHome, CgProfile } from 'react-icons/cg'
 import LogoutButton from './LogoutButton';
 import { BsFillChatQuoteFill } from 'react-icons/bs';
+import { IoSettingsOutline } from 'react-icons/io5';
 
 const Header = () => {
   const { toggleColorMode, colorMode } = useColorMode()
@@ -40,6 +41,9 @@ const Header = () => {
           </Link>
           <Link as={RouterLink} to={`/chat`}>
             <BsFillChatQuoteFill size={24} />
+          </Link>
+          <Link as={RouterLink} to={`/settings`}>
+            <IoSettingsOutline size={20} />
           </Link>
           <LogoutButton />
         </Flex>

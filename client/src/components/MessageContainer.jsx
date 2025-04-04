@@ -10,6 +10,7 @@ import useShowToast from '@/hooks/useShowToast'
 import useAuth from '../../store/useAuth'
 import { useSocket } from '@/context/SocketContext'
 import useMessages from '../../store/useMessages'
+import messageSound from "../assets/sounds/message.mp3"
 
 const MessageContainer = () => {
 
@@ -46,6 +47,13 @@ const MessageContainer = () => {
 
         setMessages(prev => [...prev, message])
        }
+
+       if(!document.hasFocus()) {
+        const sound = new Audio(messageSound)
+        sound.play()
+       }
+       
+
         
         const updatedConversations = conversations.map(conversation => {
           if(conversation._id === message.conversationId) {

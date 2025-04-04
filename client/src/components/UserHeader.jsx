@@ -9,16 +9,13 @@ import { useState } from 'react'
 import axios from 'axios'
 import useShowToast from '../hooks/useShowToast'
 import { Link as RouterLink } from "react-router-dom"
+import useFollowUnfollow from '@/hooks/useFollowUnfollow'
 
 
 const UserHeader = ({ user }) => {
     const { loggedInUser } = useAuth()
-    const [following, setFollowing] = useState(user.followers.includes(loggedInUser?._id))
+    const { handleFollowUnFollow, following, updating } = useFollowUnfollow(user)
     
-    const showToast = useShowToast()
-    const [updating, setUpdating] = useState(false)
-
-    const navigate = useNavigate()
     
     const gray = {
         dark: "#1e1e1e",
@@ -38,38 +35,7 @@ const UserHeader = ({ user }) => {
     }
     
 
-    const handleFollowUnFollow = async () => {
-        if(!loggedInUser){
-            showToast("Error", "error", "Please login to follow")
-            navigate("/auth")
-        }
-        if (updating) return
-        setUpdating(true)
-        try {
-            const response = await axios.post(`/api/users/follow/${user._id}`, {})
-            const { data } = response
-            console.log(data);
-            if(following) {
-                showToast("Success", "success", `Unfollowed ${user.name}`)
-                 user.followers.pop()
-            } else {
-                showToast("Success", "success", `Followed ${user.name}`)
-                user.followers.push(loggedInUser._id)
-            }
-            setFollowing(!following)
-            
-        } catch (err) {
-            if(err.response && err.response.data.error){
-                showToast("Error", "error", err.response.data.error)
-               }else {
-                showToast("Error", "error", err.response.statusText)
-               }
-            console.log(err);
-            
-        } finally {
-            setUpdating(false)
-        }
-    }
+    
     
     return (
         

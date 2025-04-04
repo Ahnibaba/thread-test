@@ -7,6 +7,11 @@ const conversationSchema = new mongoose.Schema({
   }],
   lastMessage: {
     text: String,
+    img: {
+      type: String,
+      default: ""
+
+    },
     sender: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
     seen: {
       type: Boolean,

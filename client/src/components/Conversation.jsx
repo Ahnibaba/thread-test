@@ -2,7 +2,7 @@ import {Box, Circle, Flex, Float, Image, Stack, Text, WrapItem } from '@chakra-u
 import { useColorMode, useColorModeValue } from './ui/color-mode'
 import { Avatar } from '@chakra-ui/react'
 import useAuth from '../../store/useAuth'
-import { BsCheck2All } from 'react-icons/bs'
+import { BsCheck2All, BsFillImageFill } from 'react-icons/bs'
 import useConversations from '../../store/useConversations'
 import useMessages from '../../store/useMessages'
 import { useEffect, useState } from 'react'
@@ -102,7 +102,11 @@ const Conversation = ({ conversation, isOnline }) => {
             ) : ""}
             <Text>
              {
-              lastMessage.text.length > 18 ? lastMessage.text.substring(0, 18) + "..." : lastMessage.text
+              lastMessage.text ? (
+                lastMessage.text.length > 18 ? lastMessage.text.substring(0, 18) + "..." : lastMessage.text
+              ) : (
+                lastMessage.img && <BsFillImageFill size={10} />
+              )
              }
            </Text>
            </Flex>

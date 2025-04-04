@@ -17,6 +17,11 @@ const useGetUserProfile = () => {
             try {
                 const response = await axios.get(`/api/users/profile/${username}`)
                 const { data } = response
+
+                if(data.isFrozen) {
+                    setUser(null)
+                    return
+                }
                 setUser(data)
 
 
@@ -32,6 +37,8 @@ const useGetUserProfile = () => {
                 } else {
                     showToast("Error", "error", error.message)
                 }
+            } finally {
+                setLoading(false)
             }
             
         }
