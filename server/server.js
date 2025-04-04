@@ -1,3 +1,4 @@
+import path from "path"
 import dotenv from "dotenv"
 import express from "express"
 import connectDB from "./db/connectDB.js"
@@ -13,7 +14,12 @@ connectDB()
 
 
 
+
+
+
+
 const PORT = process.env.PORT || 5000
+const __dirname = path.resolve()
 
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -28,6 +34,22 @@ app.use(cookieParser())
 app.use("/api/users", userRoutes)
 app.use("/api/posts", postRoutes)
 app.use("/api/messages", messageRoutes)
+
+
+// http://localhost:5000 => server, client
+
+if(process.env.NODE_ENV === "production") {
+    app.use(express.static(path.join(__dirname, "/client/dist")))
+
+    app.get("*", (req, res) => {
+       res.sendFile(path.resolve(__dirname, "client", "dist", "index.html"))
+    })
+}
+
+app.use((req, res, next) => {
+    res.setHeader("Content-Security-Policy", "default-src 'self'; img-src 'self' data:; script-src 'self'; style-src 'self' 'unsafe-inline';");
+    next();
+});
 
 
 server.listen(PORT, () => {

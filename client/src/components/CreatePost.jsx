@@ -149,6 +149,9 @@ const CreatePost = () => {
                              <CloseButton
                                onClick={() => {
                                 setImgUrl("")
+                                if (ImageRef.current) {
+                                  ImageRef.current.value = ""
+                                }
                                }}
                                bg={"gray.800"}
                                position={"absolute"}
