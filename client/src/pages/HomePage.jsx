@@ -1,5 +1,5 @@
 import { Box, Button, Flex, Spinner } from "@chakra-ui/react"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import useAuth from "../../store/useAuth"
 import { useEffect, useState } from "react"
 import useShowToast from "@/hooks/useShowToast"
@@ -13,8 +13,10 @@ const HomePage = () => {
   const [loading, setLoading] = useState(true)
 
   const { setPosts, posts } = usePosts()
+  const { setLoggedInUser } = useAuth()
 
   const showToast = useShowToast()
+  const navigate = useNavigate()
 
   const gray = {
     dark: "#1e1e1e",
@@ -34,7 +36,11 @@ const HomePage = () => {
 
       } catch (err) {
         console.log(err);
-        if (err.response?.data && err.response?.data?.error) {
+        if(err.status === 401) {
+          setLoggedInUser(null)
+          navigate("/login")
+          return
+        } else if (err.response?.data && err.response?.data?.error) {
           showToast("Error", "error", err.response.data.error)
         } else {
           showToast("Error", "error", err.response.statusText)
@@ -67,7 +73,7 @@ const HomePage = () => {
           </Flex>
         )}
 
-        {posts.map((post) => (
+        {posts?.map((post) => (
           <Post key={post._id} post={post} postedBy={post.postedBy} />
         ))}
       </Box>

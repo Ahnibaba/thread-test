@@ -19,7 +19,7 @@ const UserPage = () => {
   const { setPosts, posts } = usePosts()
 
   const showToast = useShowToast()
-  
+
 
   useEffect(() => {
     const getPosts = async () => {
@@ -29,16 +29,16 @@ const UserPage = () => {
         const { data } = response
         console.log(data);
         setPosts(data)
-        
-      } catch (error) {
-        console.log(error);
-        
-        if(error.response.data && error.response.data.error) {
-          showToast("Error", "error", error.response.data.error)
-        } else if(error.response.statusText){
-          showToast("Error", "error", error.response.statusText)
+
+      } catch (err) {
+        console.log(err);
+        if (err.status === 401) {
+          setLoggedInUser(null)
+          return
+        } else if (err.response?.data && err.response?.data?.error) {
+          showToast("Error", "error", err.response.data.error)
         } else {
-          showToast("Error", "error", error.message)
+          showToast("Error", "error", err.response.statusText)
         }
       } finally {
         setFetchingUserPosts(false)
@@ -48,35 +48,35 @@ const UserPage = () => {
 
   }, [username])
 
-  
 
-  if(!user && loading) {
+
+  if (!user && loading) {
     return (
       <Flex justifyContent={"center"}>
         <Spinner size={"xl"} />
       </Flex>
     )
-  } 
+  }
 
-  if(!user && !loading) return <h1>User not found</h1>
+  if (!user && !loading) return <h1>User not found</h1>
   return (
     <>
       <UserHeader user={user} />
 
       {!fetchingUserPosts && posts.length === 0 && <h1>User has not posts</h1>}
       {fetchingUserPosts && (
-      
-          <Flex justifyContent={"center"} my={12}>
+
+        <Flex justifyContent={"center"} my={12}>
           <Spinner size={"xl"} />
         </Flex>
-      
+
       )}
       {posts.map((post) => (
         <Post key={post._id} post={post} postedBy={post.postedBy} />
       ))}
 
 
-      
+
     </>
   )
 }

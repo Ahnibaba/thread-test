@@ -34,7 +34,6 @@ const LoginCard = () => {
         setLoading(true)
         try {
             const { data } = await axios.post("/api/users/login", loginValues)
-            localStorage.setItem("threadUser", JSON.stringify(data))
             setLoggedInUser(data)
             showToast("Success", "success", "Login Successful")
 

@@ -12,6 +12,7 @@ import useAuth from '../../store/useAuth'
 import { IoReturnDownBack } from 'react-icons/io5'
 import { useSocket } from '@/context/SocketContext'
 import useMessages from '../../store/useMessages'
+import { useNavigate } from 'react-router-dom'
 
 const ChatPage = () => {
   const showToast = useShowToast()
@@ -20,11 +21,13 @@ const ChatPage = () => {
   const [searchText, setSearchText] = useState("")
   const [searchingUser, setSearchingUser] = useState(false)
   const { conversations, setConversations, selectedConversation, setSelectedConversation, searchConversations, setSearchConversations } = useConversations()
-  const { loggedInUser } = useAuth()
+  const { loggedInUser, setLoggedInUser } = useAuth()
   const { socket, onlineUsers } = useSocket()
   const { typing, messageText } = useMessages()
 
-  
+  const navigate = useNavigate()
+
+
 
   const gray = {
     dark: "#1e1e1e",
@@ -56,7 +59,7 @@ const ChatPage = () => {
 
 
   useEffect(() => {
-    
+
     socket.on("conversationTyping", (conversationData) => {
       console.log(conversationData);
       console.log(conversations);
@@ -113,9 +116,17 @@ const ChatPage = () => {
         console.log(conversations);
 
 
-      } catch (error) {
-        console.log(error);
-        showToast("Error", "error", error)
+      } catch (err) {
+        console.log(err);
+        if (err.status === 401) {
+          setLoggedInUser(null)
+          navigate("/auth")
+          return
+        } else if (err.response?.data && err.response?.data?.error) {
+          showToast("Error", "error", err.response.data.error)
+        } else {
+          showToast("Error", "error", err.response.statusText)
+        }
 
       } finally {
         setLoadingConversations(false)

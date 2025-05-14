@@ -51,7 +51,6 @@ const SignupCard = () => {
             // const data = await res.json()
 
             showToast("Sucess", "success", "Signed up successful")
-            localStorage.setItem("threadUser", JSON.stringify(data))
             setLoggedInUser(data)
 
         } catch (err) {

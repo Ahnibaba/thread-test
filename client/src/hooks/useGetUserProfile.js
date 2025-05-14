@@ -2,6 +2,7 @@ import { useEffect, useState } from "react"
 import { useParams } from "react-router-dom"
 import useShowToast from "./useShowToast"
 import axios from "axios"
+import useAuth from "../../store/useAuth"
 
 
 const useGetUserProfile = () => {
@@ -9,7 +10,8 @@ const useGetUserProfile = () => {
     const [loading, setLoading] = useState(true)
 
     const { username } = useParams()
-    
+    const { setLoggedInUser } = useAuth()
+
     const showToast = useShowToast()
 
     useEffect(() => {
@@ -18,7 +20,7 @@ const useGetUserProfile = () => {
                 const response = await axios.get(`/api/users/profile/${username}`)
                 const { data } = response
 
-                if(data.isFrozen) {
+                if (data.isFrozen) {
                     setUser(null)
                     return
                 }
@@ -28,19 +30,21 @@ const useGetUserProfile = () => {
                 // const res = await fetch(`/api/users/profile/${username}`)
                 // const data = await res.json()
                 // console.log(data);
-            } catch (error) {
+            } catch (err) {
 
-                if (error.response.data && error.response.data.error) {
-                    showToast("Error", "error", error.response.data.error)
-                } else if (error.response.statusText) {
-                    showToast("Error", "error", error.response.statusText)
+                console.log(err);
+                if (err.status === 401) {
+                    setLoggedInUser(null)
+                    return
+                } else if (err.response?.data && err.response?.data?.error) {
+                    showToast("Error", "error", err.response.data.error)
                 } else {
-                    showToast("Error", "error", error.message)
+                    showToast("Error", "error", err.response.statusText)
                 }
             } finally {
                 setLoading(false)
             }
-            
+
         }
 
         getUser()
