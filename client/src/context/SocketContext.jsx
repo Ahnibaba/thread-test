@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { io } from "socket.io-client";
 import useAuth from "../../store/useAuth";
+import axios from "axios";
 
 const SocketContext = createContext()
 
@@ -13,7 +14,26 @@ export const SocketContextProvider = ({ children }) => {
     const [onlineUsers, setOnlineUsers] = useState([])
     
 
-    const { loggedInUser } = useAuth()
+    const { loggedInUser, setLoggedInUser } = useAuth()
+
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const response = await axios.get("/api/users/check-auth")
+        console.log("CHECK AUTH", response);
+        
+        setLoggedInUser(response.data)
+      } catch (err) {
+        console.log(err);
+        if (err.status === 401) {
+          setLoggedInUser(null)
+          navigate("/auth")
+        }
+      }
+    }
+    checkAuth()
+  }, [])
 
     useEffect(() => {
       const socket = io("/", {

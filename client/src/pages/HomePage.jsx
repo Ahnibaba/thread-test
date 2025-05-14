@@ -38,7 +38,7 @@ const HomePage = () => {
         console.log(err);
         if(err.status === 401) {
           setLoggedInUser(null)
-          navigate("/login")
+          navigate("/auth")
           return
         } else if (err.response?.data && err.response?.data?.error) {
           showToast("Error", "error", err.response.data.error)

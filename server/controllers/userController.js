@@ -5,6 +5,18 @@ import { v2 as cloudinary } from "cloudinary"
 import mongoose from "mongoose"
 import postModel from "../models/postModel.js"
 
+
+
+const checkAuth = async(req, res) => {
+  const user = req.user
+  try {
+    res.status(200).json(user)
+  } catch (error) {
+    console.log("Error in checkAuth function", error);
+    
+  }
+}
+
 const getUserProfile = async (req, res) => {
     //We will fetch user profile either with username or userId
     //query is either username or userId
@@ -296,4 +308,4 @@ const getSuggestedUsers = async (req, res) => {
 
 
 
-export { signupUser, loginUser, logoutUser, followUnFollowUser, updateUser, getUserProfile, getSuggestedUsers, freezeAccount }
+export { checkAuth, signupUser, loginUser, logoutUser, followUnFollowUser, updateUser, getUserProfile, getSuggestedUsers, freezeAccount }
